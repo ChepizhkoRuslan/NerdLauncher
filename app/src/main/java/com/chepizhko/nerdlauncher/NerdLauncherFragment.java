@@ -1,6 +1,7 @@
 package com.chepizhko.nerdlauncher;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -53,18 +54,31 @@ public class NerdLauncherFragment extends Fragment {
     }
     // определите класс ViewHolder для отображения метки активности.
     // Сохраните объект ResolveInfo активности в переменной класса
-    private class ActivityHolder extends RecyclerView.ViewHolder {
+    private class ActivityHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ResolveInfo mResolveInfo;
         private TextView mNameTextView;
         public ActivityHolder(View itemView) {
             super(itemView);
             mNameTextView = (TextView) itemView;
+            mNameTextView.setOnClickListener(this);
         }
         public void bindActivity(ResolveInfo resolveInfo) {
             mResolveInfo = resolveInfo;
             PackageManager pm = getActivity().getPackageManager();
             String appName = mResolveInfo.loadLabel(pm).toString();
             mNameTextView.setText(appName);
+        }
+        // При нажатии на активности в списке по данным ActivityInfo этой активности создайте явный интент.
+        // Затем используйте этот явный интент для запуска выбранной активности
+        @Override
+        public void onClick(View v) {
+            ActivityInfo activityInfo = mResolveInfo.activityInfo;
+            // мы получаем имя пакета и имя класса из метаданных и используем их для создания явной активности методом Intent
+            // public Intent setClassName(String packageName, String className)
+            Intent i = new Intent(Intent.ACTION_MAIN).setClassName(activityInfo.applicationInfo.packageName, activityInfo.name)
+                    // Чтобы при запуске новой активности запускалась новая задача, следует добавить в интент соответствующий флаг
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
         }
     }
 
